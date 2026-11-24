@@ -67,3 +67,8 @@ def test_exact_match_normalization():
 def test_extract_sql_from_chatty_reply():
     assert extract_sql("Sure! Here it is:\n```sql\nSELECT name FROM head;\n```") == "SELECT name FROM head"
     assert extract_sql("The query is SELECT age FROM head; hope it helps") == "SELECT age FROM head"
+
+
+def test_unbuildable_schema_is_skipped_not_crashing():
+    res = execution_match("SELECT 1", "SELECT 1", "CREATE TABLE t (order VARCHAR)")
+    assert res["correct"] is None and res["error"].startswith("schema failed")
