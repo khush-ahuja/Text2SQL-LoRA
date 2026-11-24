@@ -96,7 +96,10 @@ def execution_match(pred: str, gold: str, context: str, seeds=(0, 1, 2)) -> dict
     """Returns {'correct': bool, 'valid': bool, 'error': str | None}."""
     ordered = "order by" in gold.lower()
     for seed in seeds:
-        con = build_db(context, gold, seed)
+        try:
+            con = build_db(context, gold, seed)
+        except Exception as e:  # schema that SQLite can't create (e.g. a reserved word as a column name)
+            return {"correct": None, "valid": False, "error": "schema failed: " + str(e)}
         gold_rows, gold_err = _run(con, gold)
         pred_rows, pred_err = _run(con, pred)
         con.close()
