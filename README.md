@@ -60,7 +60,7 @@ python infer.py --adapter runs/qwen05b-lora/adapter \
 pytest
 ```
 
-18 offline tests (no GPU or downloads) cover the evaluator (equivalent queries pass, wrong filters fail, invalid SQL, broken gold queries, ordering, float noise, SQL extraction from chatty replies) and the training data path (prompt masking, truncation, padding, deterministic split). CI runs ruff and the tests on Python 3.10–3.12.
+19 offline tests (no GPU or downloads) cover the evaluator (equivalent queries pass, wrong filters fail, invalid SQL, broken gold queries or schemas, ordering, float noise, SQL extraction from chatty replies) and the training data path (prompt masking, truncation, padding, deterministic split). CI runs ruff and the tests on Python 3.10–3.12.
 
 ## Limitations
 
