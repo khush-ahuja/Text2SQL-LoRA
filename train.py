@@ -51,7 +51,7 @@ def main():
     args = TrainingArguments(
         output_dir=a.out, num_train_epochs=a.epochs, per_device_train_batch_size=a.batch,
         gradient_accumulation_steps=a.grad_accum, learning_rate=a.lr, lr_scheduler_type="cosine",
-        warmup_ratio=0.03, logging_steps=25, save_strategy="no", report_to=[],
+        warmup_steps=30, logging_steps=25, save_strategy="no", report_to=[],
         fp16=torch.cuda.is_available(), remove_unused_columns=False)
     t0 = time.time()
     trainer = Trainer(model=model, args=args, train_dataset=train,
