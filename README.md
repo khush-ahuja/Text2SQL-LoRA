@@ -13,12 +13,22 @@ SQL:      SELECT COUNT(*) FROM head WHERE age > 56
 
 ## Results
 
-Training and evaluation run in [`colab_train.ipynb`](colab_train.ipynb) on a free T4. The table below is filled from `eval.json` after the run (500 held-out questions, base model vs the same model with the LoRA adapter).
+500 held-out questions (489 scored; 11 skipped because their gold SQL doesn't run), same prompt and greedy decoding for every model, scored on a free Colab T4 on 25 Nov 2026:
 
-| Model | Execution accuracy | Exact match | Valid SQL |
-|---|---|---|---|
-| Qwen2.5-0.5B-Instruct (base) | _pending run_ | | |
-| + LoRA (20k examples, 1 epoch) | _pending run_ | | |
+| Model | Params trained | Execution accuracy | Exact match | Valid SQL |
+|---|---|---|---|---|
+| Qwen2.5-0.5B-Instruct (no fine-tuning) | 0 | 50.7% | 44.6% | 94.3% |
+| Qwen2.5-3B-Instruct (no fine-tuning, 6x larger) | 0 | 57.3% | 57.7% | 97.1% |
+| **Qwen2.5-0.5B-Instruct + LoRA** | **8.8M (1.75%)** | **86.5%** | **74.9%** | **99.0%** |
+
+- **+35.8 points** of execution accuracy over the same model before fine-tuning, and **+29.2 points over a model 6x its size**.
+- Training: 20,000 examples, 1 epoch, LoRA rank 16 on all attention and MLP projections, **18.8 minutes** on a free T4. Train loss went from 0.148 to 0.036. Details in [`results/`](results/).
+
+**What the numbers do and don't mean.** Looking at the predictions (`eval_samples.jsonl`):
+
+- Part of the gain is the model learning this dataset's conventions, for example copying the question's literal values exactly as written (`"april 2"` rather than reformatting it to `'04-02'`). That is real improvement on this data, but it would transfer less to a database with different conventions.
+- Many of the remaining 66 "failures" are noise in the reference SQL, which is derived from WikiSQL. For example, "What year had the chassis March 762?" has the reference answer `SELECT COUNT(year) ...`, and the model's `SELECT year ...` is marked wrong.
+- Only 5 of the LoRA model's 489 queries were invalid SQL.
 
 ## How it works
 
@@ -49,6 +59,7 @@ Every prediction is saved to `eval_samples.jsonl` for error analysis.
 pip install -r requirements.txt
 python train.py --n-train 20000 --epochs 1 --out runs/qwen05b-lora
 python evaluate.py --adapter runs/qwen05b-lora/adapter --n-test 500
+python evaluate.py --model Qwen/Qwen2.5-3B-Instruct --out-dir runs/qwen3b-base   # zero-shot baseline
 python infer.py --adapter runs/qwen05b-lora/adapter \
   --schema "CREATE TABLE employees (name VARCHAR, dept VARCHAR, salary INTEGER)" \
   --question "Which department has the highest average salary?"
@@ -66,7 +77,7 @@ pytest
 
 - Single-table-heavy dataset with simple queries; this is not Spider/BIRD-level SQL.
 - Synthetic databases can't catch every wrong query, so execution accuracy here is an upper bound on true correctness (checking on three databases makes this much tighter than one).
-- 500 test questions gives roughly ±4 points of uncertainty on each accuracy number.
+- 489 scored questions gives roughly ±3–4 points of uncertainty on each accuracy number.
 
 ## Project layout
 
