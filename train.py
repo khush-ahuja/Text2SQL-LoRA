@@ -30,7 +30,11 @@ def main():
     p.add_argument("--grad-accum", type=int, default=1)
     p.add_argument("--max-len", type=int, default=384)
     p.add_argument("--out", default="runs/qwen05b-lora")
+    p.add_argument("--allow-cpu", action="store_true", help="run even without a GPU (very slow)")
     a = p.parse_args()
+    if not torch.cuda.is_available() and not a.allow_cpu:
+        raise SystemExit("No GPU found. Switch the runtime to a GPU (Colab: T4; Kaggle: GPU T4 x2) "
+                         "or pass --allow-cpu to run anyway.")
 
     tok = AutoTokenizer.from_pretrained(a.model)
     pad_id = tok.pad_token_id if tok.pad_token_id is not None else tok.eos_token_id
