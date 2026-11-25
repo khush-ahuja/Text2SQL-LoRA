@@ -1,0 +1,11 @@
+{
+  "n_test": 500,
+  "base_model": "Qwen/Qwen2.5-3B-Instruct",
+  "base": {
+    "n_scored": 489,
+    "execution_accuracy": 0.5726,
+    "exact_match": 0.5767,
+    "valid_sql": 0.9714,
+    "skipped_bad_gold": 11
+  }
+}
