@@ -3,7 +3,7 @@
 [![tests](https://github.com/khush-ahuja/Text2SQL-LoRA/actions/workflows/tests.yml/badge.svg)](https://github.com/khush-ahuja/Text2SQL-LoRA/actions/workflows/tests.yml)
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/khush-ahuja/Text2SQL-LoRA/blob/main/colab_train.ipynb)
 
-Fine-tuning a small open LLM (**Qwen2.5-0.5B-Instruct**) to turn questions into SQL with **LoRA**, on a free Colab T4, and measuring whether it actually got better.
+Fine-tuning a small open LLM (**Qwen2.5-0.5B-Instruct**) to turn questions into SQL with **LoRA** on a single T4 GPU, and measuring whether it actually got better.
 
 ```
 Schema:   CREATE TABLE head (name VARCHAR, born_state VARCHAR, age INTEGER)
@@ -13,7 +13,7 @@ SQL:      SELECT COUNT(*) FROM head WHERE age > 56
 
 ## Results
 
-500 held-out questions (489 scored; 11 skipped because their gold SQL doesn't run), same prompt and greedy decoding for every model, scored on a free Colab T4 on 25 Nov 2026:
+500 held-out questions (489 scored; 11 skipped because their gold SQL doesn't run), same prompt and greedy decoding for every model, scored on a single T4 GPU on 25 Nov 2026:
 
 | Model | Params trained | Execution accuracy | Exact match | Valid SQL |
 |---|---|---|---|---|
@@ -22,7 +22,7 @@ SQL:      SELECT COUNT(*) FROM head WHERE age > 56
 | **Qwen2.5-0.5B-Instruct + LoRA** | **8.8M (1.75%)** | **86.5%** | **74.9%** | **99.0%** |
 
 - **+35.8 points** of execution accuracy over the same model before fine-tuning, and **+29.2 points over a model 6x its size**.
-- Training: 20,000 examples, 1 epoch, LoRA rank 16 on all attention and MLP projections, **18.8 minutes** on a free T4. Train loss went from 0.148 to 0.036. Details in [`results/`](results/).
+- Training: 20,000 examples, 1 epoch, LoRA rank 16 on all attention and MLP projections, **18.8 minutes** on a single T4 GPU (16 GB). Train loss went from 0.148 to 0.036. Details in [`results/`](results/).
 
 **What the numbers do and don't mean.** Looking at the predictions (`eval_samples.jsonl`):
 
@@ -52,7 +52,7 @@ Every prediction is saved to `eval_samples.jsonl` for error analysis.
 
 ## Run it
 
-**Colab (free T4, about 25 minutes):** click the badge above, then Runtime → Run all.
+**Colab (T4 GPU, about 25 minutes):** click the badge above, then Runtime → Run all.
 
 **Locally (GPU):**
 ```bash
