@@ -45,7 +45,8 @@ def score(rows, raw_outputs):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--model", default="Qwen/Qwen2.5-0.5B-Instruct")
-    p.add_argument("--adapter", required=True)
+    p.add_argument("--adapter", help="LoRA adapter folder; omit to score only the base model")
+    p.add_argument("--out-dir", help="where to write eval.json (default: next to the adapter)")
     p.add_argument("--n-test", type=int, default=500)
     p.add_argument("--batch", type=int, default=32)
     a = p.parse_args()
@@ -60,17 +61,19 @@ def main():
     print("base model...")
     all_samples["base"] = score(rows, generate(model, tok, rows, a.batch))
 
-    from peft import PeftModel
+    if a.adapter:
+        from peft import PeftModel
 
-    print("\nLoRA model...")
-    model = PeftModel.from_pretrained(model, a.adapter)
-    all_samples["lora"] = score(rows, generate(model, tok, rows, a.batch))
+        print("\nLoRA model...")
+        model = PeftModel.from_pretrained(model, a.adapter)
+        all_samples["lora"] = score(rows, generate(model, tok, rows, a.batch))
 
     for name, samples in all_samples.items():
         results[name] = summarize(samples)
         print(f"\n{name}: {results[name]}")
 
-    out = Path(a.adapter).parent
+    out = Path(a.out_dir) if a.out_dir else Path(a.adapter).parent if a.adapter else Path("runs/base")
+    out.mkdir(parents=True, exist_ok=True)
     (out / "eval.json").write_text(json.dumps({"n_test": len(rows), "base_model": a.model, **results}, indent=2))
     with open(out / "eval_samples.jsonl", "w") as f:
         for name, samples in all_samples.items():
