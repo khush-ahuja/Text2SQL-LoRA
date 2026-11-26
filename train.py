@@ -2,7 +2,7 @@
 
     python train.py --model Qwen/Qwen2.5-0.5B-Instruct --n-train 20000 --epochs 1 --out runs/qwen05b-lora
 
-Fits on a free Colab T4 (16 GB): the base model is frozen, only low-rank adapters on the attention and
+Fits on a single T4 GPU (16 GB): the base model is frozen, only low-rank adapters on the attention and
 MLP projections are trained (~1% of the parameters).
 """
 import argparse
